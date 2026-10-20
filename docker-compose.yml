@@ -1,16 +1,17 @@
 services:
   db:
-    image: mysql:8.0
+    image: postgres:16
     container_name: markly-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: markly_root_pw
-      MYSQL_DATABASE: markly
+      POSTGRES_DB: markly
+      POSTGRES_USER: markly
+      POSTGRES_PASSWORD: markly_pw
       TZ: Asia/Kolkata
     volumes:
-      - markly-data:/var/lib/mysql
+      - markly-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -pmarkly_root_pw --silent"]
+      test: ["CMD-SHELL", "pg_isready -U markly -d markly"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -23,9 +24,9 @@ services:
       db:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:mysql://db:3306/markly?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata
-      DB_USER: root
-      DB_PASSWORD: markly_root_pw
+      DB_URL: jdbc:postgresql://db:5432/markly
+      DB_USER: markly
+      DB_PASSWORD: markly_pw
       TZ: Asia/Kolkata
 
   frontend:
@@ -38,4 +39,4 @@ services:
       - "3000:80"
 
 volumes:
-  markly-data:
+  markly-pgdata:

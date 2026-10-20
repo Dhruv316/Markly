@@ -1,7 +1,7 @@
 # Markly - Attendance made simple
 
 A clean, light-themed attendance management system.
-Spring Boot REST API + React front end + MySQL, all running in Docker.
+Spring Boot REST API + React front end + PostgreSQL, all running in Docker.
 
 ## Run it (one command)
 
@@ -25,7 +25,7 @@ Stop with `Ctrl+C`. To also wipe the database: `docker compose down -v`
 - Dashboard with totals, average attendance and a low-attendance list
 
 ## Project structure
-    docker-compose.yml     db (MySQL) + backend + frontend
+    docker-compose.yml     db (PostgreSQL) + backend + frontend
     backend/               Spring Boot 3 / Java 17
       model/               JPA entities (Student, Subject, AttendanceRecord, AppUser)
       repository/          Spring Data JPA repositories
@@ -42,12 +42,20 @@ Stop with `Ctrl+C`. To also wipe the database: `docker compose down -v`
     GET    /api/reports/summary?subjectId=      GET  /api/dashboard
 
 ## Syllabus topics used
-OOP and inheritance-style layering, custom exceptions, Spring Boot REST APIs, database integration (JPA/Hibernate on MySQL),
+OOP and inheritance-style layering, custom exceptions, Spring Boot REST APIs, database integration (JPA/Hibernate on PostgreSQL),
 MVC-style separation, React components, state, props, hooks and routing, plus DOM events through React.
 
 ## Run without Docker (optional)
-Backend: install Java 17, Maven and MySQL, then `cd backend && mvn spring-boot:run`
-(set `DB_URL`, `DB_USER`, `DB_PASSWORD` if your MySQL differs).
+Backend: install Java 17, Maven and PostgreSQL (create a database `markly` with user `markly`, password `markly_pw`),
+then `cd backend && mvn spring-boot:run` (set `DB_URL`, `DB_USER`, `DB_PASSWORD` if yours differ).
 Frontend: `cd frontend && npm install && npm run dev` then open http://localhost:5173
+
+## Deploying on Render
+1. Create a **PostgreSQL** database on Render (same region as the backend).
+2. Create a **Web Service** from this repo: Root Directory `backend`, Runtime Docker. Environment variables:
+   `DB_URL=jdbc:postgresql://<internal-host>:5432/<database>`, `DB_USER`, `DB_PASSWORD`, `TZ=Asia/Kolkata`,
+   `JAVA_TOOL_OPTIONS=-Xmx350m` (free instances have 512 MB RAM).
+3. Create a **Static Site**: Root Directory `frontend`, Build Command `npm install && npm run build`, Publish Directory `dist`.
+   Add rewrite rules in this order: `/api/*` to `https://<your-backend>.onrender.com/api/*`, then `/*` to `/index.html`.
 
 Created by DHRUV RANE, Bharat College of Engineering

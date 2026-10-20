@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: markly-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: markly_root_pw
+      MYSQL_DATABASE: markly
+      TZ: Asia/Kolkata
+    volumes:
+      - markly-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -pmarkly_root_pw --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    build: ./backend
+    container_name: markly-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/markly?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata
+      DB_USER: root
+      DB_PASSWORD: markly_root_pw
+      TZ: Asia/Kolkata
+
+  frontend:
+    build: ./frontend
+    container_name: markly-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  markly-data:
